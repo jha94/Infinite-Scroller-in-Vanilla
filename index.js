@@ -1,15 +1,29 @@
 
 const div = document.getElementById('main');
-let page = 0
+let page = 0;
+let isLoading = true;
+
+function addLoader(){
+    isLoading?div.innerHTML+=`<p id="loading">loading...</p>`:document.getElementById('loading').remove();
+}
+
+window.addEventListener('load', ()=>addLoader())
+
+function fetchData(){
+    fetch(`https://jsonplaceholder.typicode.com/todos?_start=${page}&_limit=20`)
+    .then(response => response.json())
+    .then(json =>{
+        isLoading = false;
+        addLoader()
+        renderTitle(json)
+    })
+}
 
 function handleIntersection(entries) {
     if(entries[entries.length-1].isIntersecting){
+        div.innerHTML+=`<p id="loading">loading...</p>`
         page+=1;
-        fetch(`https://jsonplaceholder.typicode.com/todos?_start=${page}&_limit=20`)
-        .then(response => response.json())
-        .then(json =>{
-            renderTitle(json)
-        })
+        fetchData();
     }
   }
 
@@ -24,9 +38,5 @@ const renderTitle = (todos) => {
     });
 }
 
-fetch(`https://jsonplaceholder.typicode.com/todos?_start=${page}&_limit=20`)
-.then(response => response.json())
-.then(todos =>{
-    renderTitle(todos)
-})
+fetchData()
 
